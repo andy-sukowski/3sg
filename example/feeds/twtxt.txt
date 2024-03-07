@@ -1,0 +1,4 @@
+<!-- filter using 'is_post' variable, sort by 'created' -->
+${FORALL is_post created}
+${created}T00:00:00Z    ${title}: ${site_url}/${FILENAME}
+${ENDFORALL}

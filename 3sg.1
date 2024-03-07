@@ -1,0 +1,29 @@
+.Dd March 07, 2024
+.Dt 3SG 1
+.Os
+.Sh NAME
+.Nm 3sg
+.Nd suckless static site generator
+.Sh SYNOPSIS
+.Nm
+.Op Fl b Ar basedir
+.Op Fl c Ar configfile
+.Ar pages...
+.Sh DESCRIPTION
+A minimal, unrestrictive static site generator (SSG) written in ??? lines of C,
+inspired by saait.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl b Ar basedir
+Specify the base directory from which
+.Nm
+operates (default ".").
+.It Fl c Ar configfile
+Specify the global configuration file, whose variables can be overridden by
+page-specific .cfg files (default "global.cfg").
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr saait 1
+.Sh AUTHORS
+.An Andy Sukowski\-Bang Aq Mt andy@3sg.dev

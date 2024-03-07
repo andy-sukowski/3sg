@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="${lang}">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Language" content="${lang}" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="keywords" content="${keywords}" />
+	<meta name="description" content="${description}" />
+	<meta name="author" content="${author}" />
+	<meta name="generator" content="${site_generator}" />
+	<title>${title} - ${site_title}</title>
+	<link rel="stylesheet" href="style/main.css" type="text/css" media="screen" />
+	<link rel="stylesheet" href="style/print.css" type="text/css" media="print" />
+	<link rel="alternate" href="atom.xml" type="application/atom+xml" title="${site_title} Atom Feed" />
+	<link rel="alternate" href="atom_content.xml" type="application/atom+xml" title="${site_title} Atom Feed with content" />
+	<link rel="icon" href="/favicon.png" type="image/png" />
+</head>
+<body>
+	<nav id="menuwrap">
+		<table id="menu" width="100%" border="0">
+		<tr>
+			<td id="links" align="left">
+				<a href="index.html">Blog</a> |
+				<a href="gopher://3sg.dev">Gopher</a>
+			</td>
+			<td id="links-contact" align="right">
+				<span class="hidden"> | </span>
+				<a href="pgp.txt">PGP</a> |
+				<a href="mailto:${site_mail}">Mail</a>
+			</td>
+		</tr>
+		</table>
+	</nav>
+	<hr class="hidden" />
+	<main id="mainwrap">
+		<div id="main">
+			${CONTENT}
+		</div>
+	</main>
+</body>
+</html>
