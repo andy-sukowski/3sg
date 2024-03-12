@@ -1,8 +1,10 @@
 <!-- header used in both atom.xml and atom_content.xml -->
 [INCL partials/atom_header.xml]
 
-	<!-- filter using 'is_post' variable, sort by 'created' -->
-	[REVFORALL is_post created]
+	<!-- filter and sort by 'created' variable -->
+	[REVFORALL created]
+	<!-- filter using 'is_post' variable -->
+	[IF is_post]
 	<item>
 		<title>[title]</title>
 		<link>[site_url]/[FILENAME]</link>
@@ -13,6 +15,7 @@
 			<p><strong>Last modification on </strong> <time>[updated]</time></p>
 			[CONTENT]\]\]></description>
 	</item>
+	[ENDIF]
 	[ENDREVFORALL]
 </channel>
 </rss>

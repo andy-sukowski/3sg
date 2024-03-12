@@ -1,4 +1,3 @@
-<!-- filter using 'is_page' variable, sort by 'created' -->
-[FORALL is_page created]
+[FORALL created]
 [site_url]/[FILENAME]
 [ENDFORALL]
