@@ -2,10 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 	<!-- filter using 'is_page' variable, sort by 'updated' -->
-	${FORALL is_page updated}
+	[FORALL is_page updated]
 	<url>
-		<loc>${site_url}/${FILENAME}</loc>
-		<lastmod>${updated}</lastmod>
+		<loc>[site_url]/[FILENAME]</loc>
+		<lastmod>[updated]</lastmod>
 	</url>
-	${ENDFORALL}
+	[ENDFORALL]
 </urlset>

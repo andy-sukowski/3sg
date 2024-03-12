@@ -1,16 +1,16 @@
 <!-- header used in both atom.xml and atom_content.xml -->
-${INCL partials/atom_header.xml}
+[INCL partials/atom_header.xml]
 
 	<!-- filter using 'is_post' variable, sort by 'created' -->
-	${REVFORALL is_post created}
+	[REVFORALL is_post created]
 	<item>
-		<title>${title}</title>
-		<link>${site_url}/${FILENAME}</link>
-		<guid>${site_url}/${FILENAME}</guid>
-		<dc:date>${created}T00:00:00Z</dc:date>
-		<author>${author}</author>
-		<description>${description}</description>
+		<title>[title]</title>
+		<link>[site_url]/[FILENAME]</link>
+		<guid>[site_url]/[FILENAME]</guid>
+		<dc:date>[created]T00:00:00Z</dc:date>
+		<author>[author]</author>
+		<description>[description]</description>
 	</item>
-	${ENDREVFORALL}
+	[ENDREVFORALL]
 </channel>
 </rss>

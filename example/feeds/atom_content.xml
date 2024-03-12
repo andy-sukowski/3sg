@@ -1,22 +1,22 @@
 <!-- header used in both atom.xml and atom_content.xml -->
-${INCL partials/atom_header.xml}
+[INCL partials/atom_header.xml]
 
 	<!-- filter using 'is_post' variable, sort by 'created' -->
-	${REVFORALL is_post created}
+	[REVFORALL is_post created]
 	<entry>
-		<title>${title}</title>
-		<link rel="alternate" type="text/html" href="${site_url}/${FILENAME}" />
-		<id>${site_url}/${FILENAME}</id>
-		<updated>${updated}T00:00:00Z</updated>
-		<published>${created}T00:00:00Z</published>
+		<title>[title]</title>
+		<link rel="alternate" type="text/html" href="[site_url]/[FILENAME]" />
+		<id>[site_url]/[FILENAME]</id>
+		<updated>[updated]T00:00:00Z</updated>
+		<published>[created]T00:00:00Z</published>
 		<author>
-			<name>${author}</name>
-			<uri>${site_url}</uri>
+			<name>[author]</name>
+			<uri>[site_url]</uri>
 		</author>
-		<summary>${description}</summary>
-		<content type="html"><![CDATA[<h1>${title}</h1>
-		<p><strong>Last modification on </strong> <time>${updated}</time></p>
-		${CONTENT}]]></content>
+		<summary>[description]</summary>
+		<content type="html"><!\[CDATA\[<h1>[title]</h1>
+		<p><strong>Last modification on </strong> <time>[updated]</time></p>
+		[CONTENT]\]\]></content>
 	</entry>
-	${ENDREVFORALL}
+	[ENDREVFORALL]
 </feed>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="${lang}">
-	<title>${site_title}</title>
-	<subtitle>${description}</subtitle>
-	<updated>${site_updated}T00:00:00Z</updated>
-	<link rel="alternate" type="text/html" href="${site_url}" />
-	<id>${site_url}/${FILENAME}</id>
-	<link rel="self" type="application/atom+xml" href="${site_url}/${FILENAME}" />
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="[lang]">
+	<title>[site_title]</title>
+	<subtitle>[description]</subtitle>
+	<updated>[site_updated]T00:00:00Z</updated>
+	<link rel="alternate" type="text/html" href="[site_url]" />
+	<id>[site_url]/[FILENAME]</id>
+	<link rel="self" type="application/atom+xml" href="[site_url]/[FILENAME]" />
