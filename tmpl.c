@@ -1,6 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 
-#include "vars.h"
+#include "tmpl.h"
 
 void *
 emalloc(size_t size)

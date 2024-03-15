@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
-#ifndef VARS_H
-#define VARS_H
+#ifndef TMPL_H
+#define TMPL_H
 
 #include <ctype.h>
 #include <errno.h>
@@ -26,4 +26,4 @@ struct var *parsevar(char **s);
  * return NULL on error */
 struct var *parsevars(char *s);
 
-#endif /* VARS_H */
+#endif /* TMPL_H */

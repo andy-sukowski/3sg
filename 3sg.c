@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "vars.h"
+#include "tmpl.h"
 
 /* parse provided variable */
 int
