@@ -14,16 +14,16 @@ struct var {
 	struct var *next;
 };
 
-struct var *newvar(char *key, char *val);
+struct var *new_var(char *key, char *val);
 
-void freevars(struct var *v);
+void free_vars(struct var *v);
 
 /* greedy parse upto '\n', '\r' or '\0',
  * return NULL on error */
-struct var *parsevar(char **s);
+struct var *parse_var(char **s);
 
 /* parse all variables in string,
  * return NULL on error */
-struct var *parsevars(char *s);
+struct var *parse_vars(char **s);
 
 #endif /* TMPL_H */

@@ -14,14 +14,14 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	struct var *v = parsevar(&argv[1]);
+	struct var *v = parse_var(&argv[1]);
 	if (!v) {
 		fprintf(stderr, "Failed to parse variable\n");
 		return EXIT_FAILURE;
 	}
 	printf("key: \"%s\"\nval: \"%s\"\n", v->key, v->val);
 
-	freevars(v);
+	free_vars(v);
 	return EXIT_SUCCESS;
 }
 

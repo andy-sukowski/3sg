@@ -25,7 +25,7 @@ ecalloc(size_t nmemb, size_t size)
 }
 
 struct var *
-newvar(char *key, char *val)
+new_var(char *key, char *val)
 {
 	struct var *v = emalloc(sizeof *v);
 	v->key = key;
@@ -34,7 +34,7 @@ newvar(char *key, char *val)
 }
 
 void
-freevars(struct var *v)
+free_vars(struct var *v)
 {
 	struct var *tmp;
 	while (v) {
@@ -49,7 +49,7 @@ freevars(struct var *v)
 /* greedy parse upto '=',
  * return NULL on error */
 char *
-parsekey(char **s)
+parse_key(char **s)
 {
 	while (isblank(**s))
 		++*s;
@@ -57,8 +57,7 @@ parsekey(char **s)
 		return NULL;
 	char *start = *s;
 
-	while (!isblank(**s))
-		++*s;
+	*s = &(*s)[strcspn(*s, " \t\n\r=")];
 	if (strchr("\n\r", **s))
 		return NULL;
 	char *end = *s;
@@ -76,7 +75,7 @@ parsekey(char **s)
 /* greedy parse upto '\n', '\r' or '\0',
  * return NULL on error */
 char *
-parseval(char **s)
+parse_val(char **s)
 {
 	while (isblank(**s))
 		++*s;
@@ -95,35 +94,35 @@ parseval(char **s)
 /* greedy parse upto '\n', '\r' or '\0',
  * return NULL on error */
 struct var *
-parsevar(char **s)
+parse_var(char **s)
 {
-	char *key = parsekey(s);
+	char *key = parse_key(s);
 	if (!key)
 		return NULL;
 	++*s; /* skip '=' */
-	char *val = parseval(s);
+	char *val = parse_val(s);
 	if (!val) {
 		free(key);
 		return NULL;
 	}
-	return newvar(key, val);
+	return new_var(key, val);
 }
 
 /* parse all variables in string,
  * return NULL on error */
 struct var *
-parsevars(char *s)
+parse_vars(char **s)
 {
 	struct var *head = NULL;
 	struct var **tail = &head;
-	while (*s) {
-		*tail = parsevar(&s);
+	while (**s) {
+		*tail = parse_var(s);
 		if (!*tail) {
-			freevars(head);
+			free_vars(head);
 			return NULL;
 		}
-		if (*s)
-			++s; /* skip '\n' or '\r' */
+		if (**s)
+			++*s; /* skip '\n' or '\r' */
 		tail = &(*tail)->next;
 	}
 	return head;
