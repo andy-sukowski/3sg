@@ -127,3 +127,24 @@ parse_vars(char **s)
 	}
 	return head;
 }
+
+struct expr *
+new_expr(enum expr_type type, char *arg)
+{
+	struct expr *x = emalloc(sizeof *x);
+	x->type = type;
+	x->arg = arg;
+	return x;
+}
+
+void
+free_exprs(struct expr *x)
+{
+	struct expr *tmp;
+	while (x) {
+		tmp = x;
+		x = x->next;
+		free(tmp->arg);
+		free(tmp);
+	}
+}
