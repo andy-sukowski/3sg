@@ -5,6 +5,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,5 +54,10 @@ struct var *parse_vars(char **s);
 struct expr *new_expr(enum expr_type type, char *arg);
 
 void free_exprs(struct expr *x);
+
+/* greedy parse expression in '[', ']',
+ * expect '[' as first character,
+ * return NULL on error */
+struct expr *parse_expr(char **s);
 
 #endif /* TMPL_H */

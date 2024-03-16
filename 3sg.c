@@ -5,12 +5,12 @@
 
 #include "tmpl.h"
 
-/* parse provided variable */
+/* just for testing */
 int
 main(int argc, char *argv[])
 {
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s <var>\n", argv[0]);
+	if (argc != 3) {
+		fprintf(stderr, "Usage: %s <var> <expr>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -19,9 +19,16 @@ main(int argc, char *argv[])
 		fprintf(stderr, "Failed to parse variable\n");
 		return EXIT_FAILURE;
 	}
-	printf("key: \"%s\"\nval: \"%s\"\n", v->key, v->val);
-
+	printf("key:  \"%s\"\nval:  \"%s\"\n", v->key, v->val);
 	free_vars(v);
+
+	struct expr *x = parse_expr(&argv[2]);
+	if (!x) {
+		fprintf(stderr, "Failed to parse expression\n");
+		return EXIT_FAILURE;
+	}
+	printf("type: \"%d\"\narg:  \"%s\"\n", x->type, x->arg);
+	free_exprs(x);
 	return EXIT_SUCCESS;
 }
 
