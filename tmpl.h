@@ -3,13 +3,6 @@
 #ifndef TMPL_H
 #define TMPL_H
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 struct var {
 	char *key, *val;
 	struct var *next;
@@ -50,6 +43,11 @@ struct var *parse_var(char **s);
 /* parse all variables in string,
  * return NULL on error */
 struct var *parse_vars(char **s);
+
+/* append b to *a,
+ * restore *a by *tail = NULL
+ * NOTE: double pointer a because [-Wreturn-local-addr] */
+struct var **concat_vars(struct var **a, struct var *b);
 
 struct expr *new_expr(enum expr_type type, char *arg);
 

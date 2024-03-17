@@ -1,5 +1,12 @@
 /* See LICENSE file for copyright and license details. */
 
+#include <ctype.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "tmpl.h"
 
 void *
@@ -126,6 +133,19 @@ parse_vars(char **s)
 		tail = &(*tail)->next;
 	}
 	return head;
+}
+
+/* append b to *a,
+ * restore *a by *tail = NULL
+ * NOTE: double pointer a because [-Wreturn-local-addr] */
+struct var **
+concat_vars(struct var **a, struct var *b)
+{
+	struct var **tail = a;
+	while (*tail)
+		tail = &(*tail)->next;
+	*tail = b;
+	return tail;
 }
 
 struct expr *
