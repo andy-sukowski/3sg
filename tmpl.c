@@ -37,7 +37,17 @@ new_var(char *key, char *val)
 	struct var *v = emalloc(sizeof *v);
 	v->key = key;
 	v->val = val;
+	v->next = NULL;
 	return v;
+}
+
+char *
+get_val(struct var *vars, const char *key)
+{
+	for (struct var *v = vars; v; v = v->next)
+		if (!strcmp(v->key, key))
+			return v->val;
+	return NULL;
 }
 
 void
@@ -154,6 +164,7 @@ new_expr(enum expr_type type, char *arg)
 	struct expr *x = emalloc(sizeof *x);
 	x->type = type;
 	x->arg = arg;
+	x->next = NULL;
 	return x;
 }
 
@@ -229,7 +240,7 @@ has_arg(enum expr_type t)
 		EXPR_FORALL,
 		EXPR_REVFORALL
 	};
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 7; ++i)
 		if (t == have_arg[i])
 			return true;
 	return false;
