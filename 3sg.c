@@ -1,9 +1,25 @@
 /* See LICENSE file for copyright and license details. */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "tmpl.h"
+
+/* check if b in same directory as a,
+ * or index.html in immediate subdirectory,
+ * expect simplified paths (use realpath(3)) */
+bool
+is_subpage(char *a, char *b)
+{
+	while (*a && *a == *b)
+		++a, ++b;
+	if (strchr(a, '/'))
+		return false;
+	b = strchr(b, '/');
+	return !b || !strcmp(b, "/index.html");
+}
 
 /* just for testing */
 int
