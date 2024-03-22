@@ -34,20 +34,19 @@ struct expr {
 
 struct var *new_var(char *key, char *val);
 
-void free_vars(struct var *v);
+char *get_val(struct var *vars, const char *key);
+
+void free_vars(struct var *v, struct var *until);
 
 /* greedy parse upto '\n', '\r' or '\0',
  * return NULL on error */
 struct var *parse_var(char **s);
 
 /* parse all variables in string,
- * return NULL on error */
-struct var *parse_vars(char **s);
-
-/* append b to *a,
- * restore *a by *tail = NULL
- * NOTE: double pointer a because [-Wreturn-local-addr] */
-struct var **concat_vars(struct var **a, struct var *b);
+ * prepend most recent variable,
+ * return 0 on success,
+ * return line number on error */
+int parse_vars(char **s, struct var **head);
 
 struct expr *new_expr(enum expr_type type, char *arg);
 

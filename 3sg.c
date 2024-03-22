@@ -9,26 +9,21 @@
 int
 main(int argc, char *argv[])
 {
-	if (argc != 3) {
-		fprintf(stderr, "Usage: %s <var> <expr>\n", argv[0]);
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s <vars>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
-	struct var *v = parse_var(&argv[1]);
-	if (!v) {
-		fprintf(stderr, "Failed to parse variable\n");
+	struct var *v = NULL;
+	int l = parse_vars(&argv[1], &v);
+	if (l != 0) {
+		fprintf(stderr, "Failed to parse variable in line %i\n", l);
+		free_vars(v, NULL);
 		return EXIT_FAILURE;
 	}
-	printf("key:  \"%s\"\nval:  \"%s\"\n", v->key, v->val);
-	free_vars(v);
-
-	struct expr *x = parse_expr(&argv[2]);
-	if (!x) {
-		fprintf(stderr, "Failed to parse expression\n");
-		return EXIT_FAILURE;
-	}
-	printf("type: \"%d\"\narg:  \"%s\"\n", x->type, x->arg);
-	free_exprs(x);
+	for (struct var *p = v; p; p = p->next)
+		printf("%s=%s\n", p->key, p->val);
+	free_vars(v, NULL);
 	return EXIT_SUCCESS;
 }
 

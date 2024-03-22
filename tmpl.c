@@ -51,10 +51,10 @@ get_val(struct var *vars, const char *key)
 }
 
 void
-free_vars(struct var *v)
+free_vars(struct var *v, struct var *until)
 {
 	struct var *tmp;
-	while (v) {
+	while (v && v != until) {
 		tmp = v;
 		v = v->next;
 		free(tmp->key);
@@ -126,36 +126,23 @@ parse_var(char **s)
 }
 
 /* parse all variables in string,
- * return NULL on error */
-struct var *
-parse_vars(char **s)
+ * prepend most recent variable,
+ * return 0 on success,
+ * return line number on error */
+int
+parse_vars(char **s, struct var **head)
 {
-	struct var *head = NULL;
-	struct var **tail = &head;
-	while (**s) {
-		*tail = parse_var(s);
-		if (!*tail) {
-			free_vars(head);
-			return NULL;
-		}
+	struct var *v;
+	for (int l = 1; **s; ++l) {
+		v = parse_var(s);
+		if (!v)
+			return l;
 		if (**s)
 			++*s; /* skip '\n' or '\r' */
-		tail = &(*tail)->next;
+		v->next = *head;
+		*head = v;
 	}
-	return head;
-}
-
-/* append b to *a,
- * restore *a by *tail = NULL
- * NOTE: double pointer a because [-Wreturn-local-addr] */
-struct var **
-concat_vars(struct var **a, struct var *b)
-{
-	struct var **tail = a;
-	while (*tail)
-		tail = &(*tail)->next;
-	*tail = b;
-	return tail;
+	return 0;
 }
 
 struct expr *
