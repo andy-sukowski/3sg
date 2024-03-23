@@ -1,35 +1,12 @@
 /* See LICENSE file for copyright and license details. */
 
 #include <ctype.h>
-#include <errno.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "fatal.h"
 #include "tmpl.h"
-
-void *
-emalloc(size_t size)
-{
-	void *p = malloc(size);
-	if (!p) {
-		fprintf(stderr, "malloc: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	return p;
-}
-
-void *
-ecalloc(size_t nmemb, size_t size)
-{
-	void *p = calloc(nmemb, size);
-	if (!p) {
-		fprintf(stderr, "calloc: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	return p;
-}
 
 struct var *
 new_var(char *key, char *val)

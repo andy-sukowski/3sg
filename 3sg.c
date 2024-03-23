@@ -5,7 +5,23 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fatal.h"
 #include "tmpl.h"
+
+char *
+read_file(char *path)
+{
+	FILE *f = efopen(path, "rb");
+
+	efseek(f, 0, SEEK_END);
+	long length = eftell(f);
+	efseek(f, 0, SEEK_SET);
+
+	char *content = emalloc(length);
+	efread(content, 1, length, f);
+	efclose(f);
+	return content;
+}
 
 /* check if b in same directory as a,
  * or index.html in immediate subdirectory,
