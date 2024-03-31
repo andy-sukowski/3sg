@@ -11,6 +11,7 @@ struct var {
 enum expr_type {
 	EXPR_INVALID,
 	EXPR_VAR,
+	EXPR_PATH,
 	EXPR_CONTENT,
 	EXPR_INCL,
 	EXPR_IF,

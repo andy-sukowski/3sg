@@ -4,7 +4,7 @@
 	<!-- filter and sort by 'updated' variable -->
 	[FORALL updated]
 	<url>
-		<loc>[site_url]/[FILENAME]</loc>
+		<loc>[site_url]/[PATH]</loc>
 		<lastmod>[updated]</lastmod>
 	</url>
 	[ENDFORALL]

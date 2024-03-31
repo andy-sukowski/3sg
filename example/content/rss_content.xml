@@ -7,13 +7,16 @@
 	[IF is_post]
 	<item>
 		<title>[title]</title>
-		<link>[site_url]/[FILENAME]</link>
-		<guid>[site_url]/[FILENAME]</guid>
+		<link>[site_url]/[PATH]</link>
+		<guid>[site_url]/[PATH]</guid>
 		<dc:date>[created]T00:00:00Z</dc:date>
 		<author>[author]</author>
-		<description>[description]</description>
+		<description><!\[CDATA\[<h1>[title]</h1>
+			<p><strong>Last modification on </strong> <time>[updated]</time></p>
+			[CONTENT]\]\]></description>
 	</item>
 	[ENDIF]
 	[ENDREVFORALL]
 </channel>
 </rss>
+

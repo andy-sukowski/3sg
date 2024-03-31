@@ -7,8 +7,8 @@
 	[IF is_post]
 	<entry>
 		<title>[title]</title>
-		<link rel="alternate" type="text/html" href="[site_url]/[FILENAME]" />
-		<id>[site_url]/[FILENAME]</id>
+		<link rel="alternate" type="text/html" href="[site_url]/[PATH]" />
+		<id>[site_url]/[PATH]</id>
 		<updated>[updated]T00:00:00Z</updated>
 		<published>[created]T00:00:00Z</published>
 		<author>
@@ -16,9 +16,6 @@
 			<uri>[site_url]</uri>
 		</author>
 		<summary>[description]</summary>
-		<content type="html"><!\[CDATA\[<h1>[title]</h1>
-		<p><strong>Last modification on </strong> <time>[updated]</time></p>
-		[CONTENT]\]\]></content>
 	</entry>
 	[ENDIF]
 	[ENDREVFORALL]

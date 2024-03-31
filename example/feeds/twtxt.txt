@@ -1,5 +1,0 @@
-[FORALL created]
-[IF is_post]
-[created]T00:00:00Z    [title]: [site_url]/[FILENAME]
-[ENDIF]
-[ENDFORALL]

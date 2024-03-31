@@ -6,21 +6,26 @@
 .Nd suckless static site generator
 .Sh SYNOPSIS
 .Nm
-.Op Fl b Ar basedir
-.Op Fl c Ar configfile
-.Ar pages...
+.Op Fl c Ar config
+.Op Fl o Ar output_dir
+.Op Fl p Ar project_dir
+.Op Fl w Ar web_root
 .Sh DESCRIPTION
 A minimal, unrestrictive static site generator (SSG) written in ??? lines of C,
 inspired by saait.
 .Sh OPTIONS
 .Bl -tag -width Ds
-.It Fl b Ar basedir
-Specify the base directory from which
-.Nm
-operates (default ".").
-.It Fl c Ar configfile
+.It Fl c Ar config
 Specify the global configuration file, whose variables can be overridden by
 page-specific .cfg files (default "global.cfg").
+.It Fl o Ar output_dir
+Specify the output directory for the generated site (default "output").
+.It Fl p Ar project_dir
+Specify the project base directory from which
+.Nm
+operates (default "."). This is relevant for TEMPLATE and [INCL ...].
+.It Fl w Ar web_root
+Specify the web root directory for [PATH] (default "content").
 .Sh EXIT STATUS
 .Ex -std
 .Sh SEE ALSO

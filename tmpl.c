@@ -182,7 +182,9 @@ parse_expr_type(char **s)
 	char tmp = **s;
 	**s = '\0';
 	enum expr_type t;
-	if (!strcmp(start, "CONTENT")) {
+	if (!strcmp(start, "PATH")) {
+		t = EXPR_PATH;
+	} else if (!strcmp(start, "CONTENT")) {
 		t = EXPR_CONTENT;
 	} else if (!strcmp(start, "INCL")) {
 		t = EXPR_INCL;
