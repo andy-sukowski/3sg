@@ -29,6 +29,28 @@ ecalloc(size_t nmemb, size_t size)
 	return p;
 }
 
+void *
+erealloc(void *ptr, size_t size)
+{
+	void *p = realloc(ptr, size);
+	if (!p) {
+		fprintf(stderr, "realloc: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	return p;
+}
+
+char *
+estrdup(const char *s)
+{
+	char *p = strdup(s);
+	if (!p) {
+		fprintf(stderr, "strdup: %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	return p;
+}
+
 FILE *
 efopen(const char *path, const char *mode)
 {

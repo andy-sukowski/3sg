@@ -7,6 +7,9 @@
 
 void *emalloc(size_t size);
 void *ecalloc(size_t nmemb, size_t size);
+void *erealloc(void *ptr, size_t size);
+
+char *estrdup(const char *s);
 
 FILE *efopen(const char *path, const char *mode);
 void efseek(FILE *f, long offset, int origin);

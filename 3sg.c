@@ -51,6 +51,46 @@ struct user_args {
 };
 
 void
+free_pages(char **pages)
+{
+	if (!pages)
+		return;
+	for (char **p = pages; *p; ++p)
+		free(*p);
+	free(pages);
+}
+
+/* read page paths seperated by '\n',
+ * expect web_root to be simplified (use realpath(3))
+ * fill pages with paths relative to web_root */
+char **
+read_pages(FILE *f, char *web_root)
+{
+	char rel[PATH_MAX];
+	char abs[PATH_MAX];
+	char **pages = NULL;
+	int len;
+	for (len = 1; fgets(rel, PATH_MAX, f) && *rel != '\n'; ++len) {
+		rel[strcspn(rel, "\n")] = '\0';
+		erealpath(rel, abs);
+
+		char *a = abs, *w = web_root;
+		while (*a && *a == *w)
+			++a, ++w;
+		if (*w) {
+			free_pages(pages);
+			fprintf(stderr, "Page %s not in web root %s\n", abs, web_root);
+			exit(EXIT_FAILURE);
+		}
+
+		pages = erealloc(pages, (len + 1) * sizeof(char *));
+		pages[len - 1] = estrdup(a);
+		pages[len] = NULL;
+	}
+	return pages;
+}
+
+void
 usage(const char *argv0)
 {
 	fprintf(stderr, "Usage: %s [-c config] [-o output_dir]"
@@ -92,11 +132,15 @@ main(int argc, char *argv[])
 	erealpath(output_dir, a.output_dir);
 	erealpath(project_dir, a.project_dir);
 	erealpath(web_root, a.web_root);
+	a.pages = read_pages(stdin, a.web_root);
 
 	printf("config: %s\n", config);
 	printf("output_dir: %s\n", a.output_dir);
 	printf("project_dir: %s\n", a.project_dir);
 	printf("web_root: %s\n", a.web_root);
+	for (char **p = a.pages; *p; ++p)
+		printf("page: %s\n", *p);
 
+	free_pages(a.pages);
 	return EXIT_SUCCESS;
 }
