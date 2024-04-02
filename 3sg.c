@@ -1,9 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 
+#include <linux/limits.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "fatal.h"
 #include "tmpl.h"
@@ -19,6 +21,7 @@ read_file(char *path)
 
 	char *content = emalloc(length);
 	efread(content, 1, length, f);
+	content[length] = '\0';
 	efclose(f);
 	return content;
 }
@@ -37,25 +40,63 @@ is_subpage(char *a, char *b)
 	return !b || !strcmp(b, "/index.html");
 }
 
-/* just for testing */
+/* arguments provided by user,
+ * simplified paths (use realpath(3)),
+ * except pages, which are relative to web_root */
+struct user_args {
+	char output_dir[PATH_MAX];
+	char project_dir[PATH_MAX];
+	char web_root[PATH_MAX];
+	char **pages;
+};
+
+void
+usage(const char *argv0)
+{
+	fprintf(stderr, "Usage: %s [-c config] [-o output_dir]"
+	                "[-p project_dir] [-w web_root]\n", argv0);
+	exit(EXIT_FAILURE);
+}
+
+/* handle command-line arguments */
 int
 main(int argc, char *argv[])
 {
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s <vars>\n", argv[0]);
-		return EXIT_FAILURE;
-	}
+	char *config = "global.cfg";
+	char *output_dir = "output";
+	char *project_dir = ".";
+	char *web_root = "content";
 
-	struct var *v = NULL;
-	int l = parse_vars(&argv[1], &v);
-	if (l != 0) {
-		fprintf(stderr, "Failed to parse variable in line %i\n", l);
-		free_vars(v, NULL);
-		return EXIT_FAILURE;
+	for (int argi = 1; argi < argc; ++argi) {
+		if (argi > argc - 2 || argv[argi][0] != '-' || argv[argi][2])
+			usage(argv[0]);
+		switch (argv[argi][1]) {
+		case 'c':
+			config = argv[++argi];
+			break;
+		case 'o':
+			output_dir = argv[++argi];
+			break;
+		case 'p':
+			project_dir = argv[++argi];
+			break;
+		case 'w':
+			web_root = argv[++argi];
+			break;
+		default:
+			usage(argv[0]);
+			break;
+		}
 	}
-	for (struct var *p = v; p; p = p->next)
-		printf("%s=%s\n", p->key, p->val);
-	free_vars(v, NULL);
+	struct user_args a;
+	erealpath(output_dir, a.output_dir);
+	erealpath(project_dir, a.project_dir);
+	erealpath(web_root, a.web_root);
+
+	printf("config: %s\n", config);
+	printf("output_dir: %s\n", a.output_dir);
+	printf("project_dir: %s\n", a.project_dir);
+	printf("web_root: %s\n", a.web_root);
+
 	return EXIT_SUCCESS;
 }
-
