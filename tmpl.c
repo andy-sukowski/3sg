@@ -68,12 +68,12 @@ parse_key(char **s)
 {
 	while (isblank(**s))
 		++*s;
-	if (strchr("=\n\r", **s))
+	if (strchr("=\n", **s))
 		return NULL;
 	char *start = *s;
 
-	*s = &(*s)[strcspn(*s, " \t\n\r=")];
-	if (strchr("\n\r", **s))
+	*s = &(*s)[strcspn(*s, " \t\n=")];
+	if (strchr("\n", **s))
 		return NULL;
 	char *end = *s;
 
@@ -87,7 +87,7 @@ parse_key(char **s)
 	return key;
 }
 
-/* greedy parse upto '\n', '\r' or '\0',
+/* greedy parse upto '\n' or '\0',
  * return NULL on error */
 char *
 parse_val(char **s)
@@ -96,7 +96,7 @@ parse_val(char **s)
 		++*s;
 	char *start = *s;
 
-	*s = &(*s)[strcspn(*s, "\r\n")];
+	*s = &(*s)[strcspn(*s, "\n")];
 	char *end = *s;
 	while (isblank(*(end - 1)))
 		--end;
@@ -106,7 +106,7 @@ parse_val(char **s)
 	return val;
 }
 
-/* greedy parse upto '\n', '\r' or '\0',
+/* greedy parse upto '\n' or '\0',
  * return NULL on error */
 struct var *
 parse_var(char **s)
@@ -136,7 +136,7 @@ parse_vars(char **s, struct var **head)
 		if (!v)
 			return l;
 		if (**s)
-			++*s; /* skip '\n' or '\r' */
+			++*s; /* skip '\n' */
 		v->next = *head;
 		*head = v;
 	}
@@ -175,8 +175,8 @@ parse_expr_type(char **s)
 		return EXPR_VAR;
 
 	char *start = *s;
-	*s = &(*s)[strcspn(*s, " \t[]\n\r")];
-	if (strchr("[\n\r", **s))
+	*s = &(*s)[strcspn(*s, " \t[]\n")];
+	if (strchr("[\n", **s))
 		return EXPR_INVALID;
 
 	char tmp = **s;
@@ -240,8 +240,8 @@ char *
 parse_arg(char **s)
 {
 	char *start = *s;
-	*s = &(*s)[strcspn(*s, " \t[]\n\r")];
-	if (strchr("[\n\r", **s))
+	*s = &(*s)[strcspn(*s, " \t[]\n")];
+	if (strchr("[\n", **s))
 		return NULL;
 
 	char *arg = ecalloc(1, *s - start + 1);
@@ -260,7 +260,7 @@ parse_expr(char **s)
 
 	while (isblank(**s))
 		++*s;
-	if (strchr("[]\n\r", **s))
+	if (strchr("[]\n", **s))
 		return NULL;
 
 	enum expr_type t = parse_expr_type(s);
@@ -271,7 +271,7 @@ parse_expr(char **s)
 	if (has_arg(t)) {
 		while (isblank(**s))
 			++*s;
-		if (strchr("[]\n\r", **s))
+		if (strchr("[]\n", **s))
 			return NULL;
 		arg = parse_arg(s);
 	}

@@ -42,7 +42,7 @@ void free_vars(struct var *v, struct var *until);
 /* delete all variables with given key */
 void del_var(struct var **vars, const char *key);
 
-/* greedy parse upto '\n', '\r' or '\0',
+/* greedy parse upto '\n' or '\0',
  * return NULL on error */
 struct var *parse_var(char **s);
 
