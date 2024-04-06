@@ -1,10 +1,12 @@
 /* See LICENSE file for copyright and license details. */
 
+#include <errno.h>
 #include <linux/limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "fatal.h"
@@ -19,11 +21,26 @@ read_file(char *path)
 	long length = eftell(f);
 	efseek(f, 0, SEEK_SET);
 
-	char *content = emalloc(length);
+	char *content = emalloc(length + 1);
 	efread(content, 1, length, f);
 	content[length] = '\0';
 	efclose(f);
 	return content;
+}
+
+/* mkdir_p("a/b/c", 0755) creates "a/b/" */
+int
+mkdir_p(char *path, mode_t mode)
+{
+	char *p = path;
+	while ((p = strchr(p + 1, '/'))) {
+		*p = '\0';
+		int ret = mkdir(path, mode);
+		*p = '/';
+		if (ret == -1 && errno != EEXIST)
+			return -1;
+	}
+	return 0;
 }
 
 /* check if b in same directory as a,
