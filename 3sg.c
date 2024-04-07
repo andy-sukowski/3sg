@@ -28,6 +28,23 @@ read_file(char *path)
 	return content;
 }
 
+/* path doesn't include .cfg extension */
+void
+read_cfg(char *path, struct var **vars)
+{
+	char cfg_path[PATH_MAX];
+	snprintf(cfg_path, PATH_MAX, "%s.cfg", path);
+	if (access(cfg_path, F_OK))
+		return;
+	char *cfg = read_file(cfg_path);
+	int l = parse_vars(cfg, vars);
+	free(cfg);
+	if (l > 0) {
+		fprintf(stderr, "Parse error (%s:%i)\n", cfg_path, l);
+		exit(EXIT_FAILURE);
+	}
+}
+
 /* mkdir_p("a/b/c", 0755) creates "a/b/" */
 int
 mkdir_p(char *path, mode_t mode)
@@ -77,6 +94,37 @@ free_pages(char **pages)
 	free(pages);
 }
 
+void
+gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
+{
+	struct var *prev = vars;
+	read_cfg(path, &vars);
+
+	char *content = read_file(path);
+	bool esc = false;
+	int l = 1;
+	for (char *s = content; *s; ++s) {
+		if (!esc && *s == '\\') {
+			esc = true;
+			continue;
+		}
+		if (*s == '\n')
+			++l;
+		if (esc || !strchr("[]", *s)) {
+			fputc(*s, fout);
+		} else if (*s == ']') {
+			fprintf(stderr, "Unmatched ']' (%s:%i)\n", path, l);
+			exit(EXIT_FAILURE);
+		} else {
+			/* TODO, this is only temporary */
+			s = &s[strcspn(s, "]")];
+		}
+		esc = false;
+	}
+	free(content);
+	free_vars(vars, prev);
+}
+
 /* read page paths seperated by '\n',
  * expect web_root to be simplified (use realpath(3))
  * fill pages with paths relative to web_root */
@@ -119,7 +167,7 @@ usage(const char *argv0)
 int
 main(int argc, char *argv[])
 {
-	char *config = "global.cfg";
+	char *cfg_path = "global.cfg";
 	char *output_dir = "output";
 	char *project_dir = ".";
 	char *web_root = "content";
@@ -129,7 +177,7 @@ main(int argc, char *argv[])
 			usage(argv[0]);
 		switch (argv[argi][1]) {
 		case 'c':
-			config = argv[++argi];
+			cfg_path = argv[++argi];
 			break;
 		case 'o':
 			output_dir = argv[++argi];
@@ -151,13 +199,31 @@ main(int argc, char *argv[])
 	erealpath(web_root, a.web_root);
 	a.pages = read_pages(stdin, a.web_root);
 
-	printf("config: %s\n", config);
-	printf("output_dir: %s\n", a.output_dir);
-	printf("project_dir: %s\n", a.project_dir);
-	printf("web_root: %s\n", a.web_root);
-	for (char **p = a.pages; *p; ++p)
-		printf("page: %s\n", *p);
+	struct var *vars = NULL;
+	char *cfg = read_file(cfg_path);
+	int l = parse_vars(cfg, &vars);
+	free(cfg);
+	if (l > 0) {
+		fprintf(stderr, "Parse error (%s:%i)\n", cfg_path, l);
+		return EXIT_FAILURE;
+	}
 
+	char abs[PATH_MAX];
+	char out[PATH_MAX];
+	for (char **p = a.pages; *p; ++p) {
+		snprintf(abs, PATH_MAX, "%s%s", a.web_root, *p);
+		snprintf(out, PATH_MAX, "%s%s", a.output_dir, *p);
+		if (mkdir_p(out, 0755) == -1) {
+			fprintf(stderr, "Failed to create %s: %s\n", out, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		FILE *fout = efopen(out, "wb");
+
+		vars = new_var(estrdup("PATH"), estrdup(*p), vars);
+		gen(&a, fout, vars, abs);
+		efclose(fout);
+	}
+	free_vars(vars, NULL);
 	free_pages(a.pages);
 	return EXIT_SUCCESS;
 }

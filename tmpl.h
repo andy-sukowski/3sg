@@ -33,7 +33,7 @@ struct expr {
 	struct expr *next;
 };
 
-struct var *new_var(char *key, char *val);
+struct var *new_var(char *key, char *val, struct var *next);
 
 char *get_val(struct var *vars, const char *key);
 
@@ -50,9 +50,9 @@ struct var *parse_var(char **s);
  * prepend most recent variable,
  * return 0 on success,
  * return line number on error */
-int parse_vars(char **s, struct var **head);
+int parse_vars(char *s, struct var **head);
 
-struct expr *new_expr(enum expr_type type, char *arg);
+struct expr *new_expr(enum expr_type type, char *arg, struct expr *next);
 
 void free_exprs(struct expr *x);
 

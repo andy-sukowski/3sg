@@ -9,12 +9,12 @@
 #include "tmpl.h"
 
 struct var *
-new_var(char *key, char *val)
+new_var(char *key, char *val, struct var *next)
 {
 	struct var *v = emalloc(sizeof *v);
 	v->key = key;
 	v->val = val;
-	v->next = NULL;
+	v->next = next;
 	return v;
 }
 
@@ -87,8 +87,7 @@ parse_key(char **s)
 	return key;
 }
 
-/* greedy parse upto '\n' or '\0',
- * return NULL on error */
+/* greedy parse upto '\n' or '\0' */
 char *
 parse_val(char **s)
 {
@@ -120,7 +119,7 @@ parse_var(char **s)
 		free(key);
 		return NULL;
 	}
-	return new_var(key, val);
+	return new_var(key, val, NULL);
 }
 
 /* parse all variables in string,
@@ -128,15 +127,15 @@ parse_var(char **s)
  * return 0 on success,
  * return line number on error */
 int
-parse_vars(char **s, struct var **head)
+parse_vars(char *s, struct var **head)
 {
 	struct var *v;
-	for (int l = 1; **s; ++l) {
-		v = parse_var(s);
+	for (int l = 1; *s; ++l) {
+		v = parse_var(&s);
 		if (!v)
 			return l;
-		if (**s)
-			++*s; /* skip '\n' */
+		if (*s)
+			++s; /* skip '\n' */
 		v->next = *head;
 		*head = v;
 	}
@@ -144,12 +143,12 @@ parse_vars(char **s, struct var **head)
 }
 
 struct expr *
-new_expr(enum expr_type type, char *arg)
+new_expr(enum expr_type type, char *arg, struct expr *next)
 {
 	struct expr *x = emalloc(sizeof *x);
 	x->type = type;
 	x->arg = arg;
-	x->next = NULL;
+	x->next = next;
 	return x;
 }
 
@@ -282,5 +281,5 @@ parse_expr(char **s)
 		free(arg);
 		return NULL;
 	}
-	return new_expr(t, arg);
+	return new_expr(t, arg, NULL);
 }
