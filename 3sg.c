@@ -95,6 +95,45 @@ free_pages(char **pages)
 }
 
 void
+impossible(void)
+{
+	fputs("This should never have been reached.\n"
+	      "Report to Andy Sukowski-Bang <andy@3sg.dev>\n", stderr);
+	exit(EXIT_FAILURE);
+}
+
+void gen(struct user_args *a, FILE *fout, struct var *vars, char *path);
+
+/* return 1 on success, 0 on failure,
+ * gen() prints rest of error message */
+int
+handle_expr(struct user_args *a, FILE *fout, struct var *vars, struct expr *x)
+{
+	char *val;
+	switch (x->type) {
+	case EXPR_VAR:
+		val = get_val(vars, x->arg);
+		if (!val) {
+			fprintf(stderr, "Undefined variable \"%s\"", x->arg);
+			return 0;
+		}
+		fputs(val, fout);
+		break;
+	case EXPR_PATH:
+		val = get_val(vars, "PATH");
+		if (!val)
+			impossible();
+		fputs(val, fout);
+		break;
+	default:
+		fputs("TODO", fout);
+		break;
+	}
+	free_exprs(x);
+	return 1;
+}
+
+void
 gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
 {
 	struct var *prev = vars;
@@ -103,6 +142,7 @@ gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
 	char *content = read_file(path);
 	bool esc = false;
 	int l = 1;
+	struct expr *x;
 	for (char *s = content; *s; ++s) {
 		if (!esc && *s == '\\') {
 			esc = true;
@@ -115,9 +155,13 @@ gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
 		} else if (*s == ']') {
 			fprintf(stderr, "Unmatched ']' (%s:%i)\n", path, l);
 			exit(EXIT_FAILURE);
-		} else {
-			/* TODO, this is only temporary */
-			s = &s[strcspn(s, "]")];
+		} else if (!(x = parse_expr(&s))) {
+			printf("Invalid expression (%s:%i)\n", path, l);
+			exit(EXIT_FAILURE);
+		} else if (!handle_expr(a, fout, vars, x)) {
+			/* handle_expr() prints error message */
+			fprintf(stderr, " (%s:%i)\n", path, l);
+			exit(EXIT_FAILURE);
 		}
 		esc = false;
 	}
@@ -215,7 +259,7 @@ main(int argc, char *argv[])
 		snprintf(out, PATH_MAX, "%s%s", a.output_dir, *p);
 		if (mkdir_p(out, 0755) == -1) {
 			fprintf(stderr, "Failed to create %s: %s\n", out, strerror(errno));
-			exit(EXIT_FAILURE);
+			return EXIT_FAILURE;
 		}
 		FILE *fout = efopen(out, "wb");
 
