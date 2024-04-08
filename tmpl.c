@@ -28,36 +28,15 @@ get_val(struct var *vars, const char *key)
 }
 
 void
-free_var(struct var *v)
-{
-	free(v->key);
-	free(v->val);
-	free(v);
-}
-
-void
 free_vars(struct var *v, struct var *until)
 {
 	struct var *tmp;
 	while (v && v != until) {
 		tmp = v;
 		v = v->next;
-		free_var(tmp);
-	}
-}
-
-/* delete all variables with given key */
-void
-del_var(struct var **vars, const char *key)
-{
-	struct var **tail = vars;
-	while (*tail) {
-		if (!strcmp((*tail)->key, key)) {
-			free_var(*tail);
-			*tail = (*tail)->next;
-		} else {
-			tail = &(*tail)->next;
-		}
+		free(tmp->key);
+		free(tmp->val);
+		free(tmp);
 	}
 }
 
