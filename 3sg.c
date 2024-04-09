@@ -74,6 +74,30 @@ is_subpage(char *a, char *b)
 	return !b || !strcmp(b, "/index.html");
 }
 
+struct scope {
+	struct var *vars;
+	struct scope *next;
+};
+
+struct scope *
+new_scope(struct var *vars, struct scope *next)
+{
+	struct scope *sc = emalloc(sizeof *sc);
+	sc->vars = vars;
+	sc->next = next;
+	return sc;
+}
+
+/* free last scope */
+void
+free_scope(struct scope *sc)
+{
+	if (!sc)
+		return;
+	free_vars(sc->vars, sc->next ? sc->next->vars : NULL);
+	free(sc);
+}
+
 /* arguments provided by user,
  * simplified paths (use realpath(3)),
  * except pages, which are relative to web_root */
@@ -102,17 +126,17 @@ impossible(void)
 	exit(EXIT_FAILURE);
 }
 
-void gen(struct user_args *a, FILE *fout, struct var *vars, char *path);
+void gen(struct user_args *a, FILE *fout, struct scope *scope, char *path);
 
 /* return 1 on success, 0 on failure,
  * gen() prints rest of error message */
 int
-handle_expr(struct user_args *a, FILE *fout, struct var *vars, struct expr *x)
+handle_expr(struct user_args *a, FILE *fout, struct scope *sc, struct expr *x)
 {
 	char *val;
 	switch (x->type) {
 	case EXPR_VAR:
-		val = get_val(vars, x->arg);
+		val = get_val(sc->vars, x->arg);
 		if (!val) {
 			fprintf(stderr, "Undefined variable \"%s\"", x->arg);
 			return 0;
@@ -120,7 +144,7 @@ handle_expr(struct user_args *a, FILE *fout, struct var *vars, struct expr *x)
 		fputs(val, fout);
 		break;
 	case EXPR_PATH:
-		val = get_val(vars, "PATH");
+		val = get_val(sc->vars, "PATH");
 		if (!val)
 			impossible();
 		fputs(val, fout);
@@ -134,10 +158,10 @@ handle_expr(struct user_args *a, FILE *fout, struct var *vars, struct expr *x)
 }
 
 void
-gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
+gen(struct user_args *a, FILE *fout, struct scope *sc, char *path)
 {
-	struct var *prev = vars;
-	read_cfg(path, &vars);
+	sc = new_scope(sc->vars, sc);
+	read_cfg(path, &sc->vars);
 
 	char *content = read_file(path);
 	bool esc = false;
@@ -158,7 +182,7 @@ gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
 		} else if (!(x = parse_expr(&s))) {
 			printf("Invalid expression (%s:%i)\n", path, l);
 			exit(EXIT_FAILURE);
-		} else if (!handle_expr(a, fout, vars, x)) {
+		} else if (!handle_expr(a, fout, sc, x)) {
 			/* handle_expr() prints error message */
 			fprintf(stderr, " (%s:%i)\n", path, l);
 			exit(EXIT_FAILURE);
@@ -166,7 +190,7 @@ gen(struct user_args *a, FILE *fout, struct var *vars, char *path)
 		esc = false;
 	}
 	free(content);
-	free_vars(vars, prev);
+	free_scope(sc);
 }
 
 /* read page paths seperated by '\n',
@@ -243,9 +267,9 @@ main(int argc, char *argv[])
 	erealpath(web_root, a.web_root);
 	a.pages = read_pages(stdin, a.web_root);
 
-	struct var *vars = NULL;
 	char *cfg = read_file(cfg_path);
-	int l = parse_vars(cfg, &vars);
+	struct scope *sc = new_scope(NULL, NULL);
+	int l = parse_vars(cfg, &sc->vars);
 	free(cfg);
 	if (l > 0) {
 		fprintf(stderr, "Parse error (%s:%i)\n", cfg_path, l);
@@ -263,11 +287,11 @@ main(int argc, char *argv[])
 		}
 		FILE *fout = efopen(out, "wb");
 
-		vars = new_var(estrdup("PATH"), estrdup(*p), vars);
-		gen(&a, fout, vars, abs);
+		sc->vars = new_var(estrdup("PATH"), estrdup(*p), sc->vars);
+		gen(&a, fout, sc, abs);
 		efclose(fout);
 	}
-	free_vars(vars, NULL);
+	free_scope(sc);
 	free_pages(a.pages);
 	return EXIT_SUCCESS;
 }
