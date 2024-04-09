@@ -134,6 +134,7 @@ int
 handle_expr(struct user_args *a, FILE *fout, struct scope *sc, struct expr *x)
 {
 	char *val;
+	char abs[PATH_MAX + 1];
 	switch (x->type) {
 	case EXPR_VAR:
 		val = get_val(sc->vars, x->arg);
@@ -155,6 +156,10 @@ handle_expr(struct user_args *a, FILE *fout, struct scope *sc, struct expr *x)
 			return 0;
 		}
 		gen(a, fout, sc->next, sc->next->vars->val, false);
+		break;
+	case EXPR_INCL:
+		snprintf(abs, PATH_MAX + 1, "%s/%s", a->project_dir, x->arg);
+		gen(a, fout, sc, abs, true);
 		break;
 	default:
 		fputs("TODO", fout);
