@@ -126,7 +126,7 @@ impossible(void)
 	exit(EXIT_FAILURE);
 }
 
-void gen(struct user_args *a, FILE *fout, struct scope *scope, char *path);
+void gen(struct user_args *a, FILE *fout, struct scope *scope, char *path, bool _read_cfg);
 
 /* return 1 on success, 0 on failure,
  * gen() prints rest of error message */
@@ -149,6 +149,13 @@ handle_expr(struct user_args *a, FILE *fout, struct scope *sc, struct expr *x)
 			impossible();
 		fputs(val, fout);
 		break;
+	case EXPR_CONTENT:
+		if (strcmp(sc->next->vars->key, "CONTENT")) {
+			fprintf(stderr, "CONTENT in non-template page?");
+			return 0;
+		}
+		gen(a, fout, sc->next, sc->next->vars->val, false);
+		break;
 	default:
 		fputs("TODO", fout);
 		break;
@@ -158,10 +165,20 @@ handle_expr(struct user_args *a, FILE *fout, struct scope *sc, struct expr *x)
 }
 
 void
-gen(struct user_args *a, FILE *fout, struct scope *sc, char *path)
+gen(struct user_args *a, FILE *fout, struct scope *sc, char *path, bool _read_cfg)
 {
-	sc = new_scope(sc->vars, sc);
-	read_cfg(path, &sc->vars);
+	if (_read_cfg) {
+		sc = new_scope(sc->vars, sc);
+		read_cfg(path, &sc->vars);
+	}
+	char *tmpl = get_val(sc->vars, "TEMPLATE");
+	if (tmpl) {
+		sc->vars = new_var(estrdup("TEMPLATE"), NULL, sc->vars);
+		sc->vars = new_var(estrdup("CONTENT"), estrdup(path), sc->vars);
+		gen(a, fout, sc, tmpl, true);
+		free_scope(sc);
+		return;
+	}
 
 	char *content = read_file(path);
 	bool esc = false;
@@ -190,7 +207,8 @@ gen(struct user_args *a, FILE *fout, struct scope *sc, char *path)
 		esc = false;
 	}
 	free(content);
-	free_scope(sc);
+	if (_read_cfg)
+		free_scope(sc);
 }
 
 /* read page paths seperated by '\n',
@@ -288,7 +306,7 @@ main(int argc, char *argv[])
 		FILE *fout = efopen(out, "wb");
 
 		sc->vars = new_var(estrdup("PATH"), estrdup(*p), sc->vars);
-		gen(&a, fout, sc, abs);
+		gen(&a, fout, sc, abs, true);
 		efclose(fout);
 	}
 	free_scope(sc);
