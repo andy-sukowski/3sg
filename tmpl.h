@@ -9,13 +9,13 @@ struct var {
 };
 
 enum expr_type {
-	EXPR_INVALID,
-	EXPR_VAR,
 	EXPR_PATH,
 	EXPR_CONTENT,
 	EXPR_INCL,
 	EXPR_IF,
 	EXPR_ENDIF,
+	EXPR_IFNOT,
+	EXPR_ENDIFNOT,
 	EXPR_FOR,
 	EXPR_ENDFOR,
 	EXPR_REVFOR,
@@ -24,6 +24,9 @@ enum expr_type {
 	EXPR_ENDFORALL,
 	EXPR_REVFORALL,
 	EXPR_ENDREVFORALL,
+	/* not in expr_type_str */
+	EXPR_INVALID,
+	EXPR_VAR
 };
 
 /* expression inside '[' and ']' */
