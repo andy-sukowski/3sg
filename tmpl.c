@@ -9,7 +9,8 @@
 #include "fatal.h"
 #include "tmpl.h"
 
-#define BLANKS " \t" /* isblank() */
+#define BLANKS " \t"         /* isblank() */
+#define WHITES " \t\n\v\f\r" /* isspace() */
 
 struct var *
 new_var(char *key, char *val, struct var *next)
@@ -146,93 +147,77 @@ free_exprs(struct expr *x)
 }
 
 /* greedy parse expression type,
- * don't trim before and after,
  * return EXPR_INVALID on error */
 enum expr_type
 parse_expr_type(char **s)
 {
-	if (islower(**s))
+	char *bgn = *s + strspn(*s, WHITES);
+	if (*bgn == '_' || (isalnum(*bgn) && islower(*bgn)))
 		return EXPR_VAR;
+	char *end = bgn + strcspn(bgn, WHITES);
+	*s = end + strspn(end, WHITES);
 
-	char *start = *s;
-	*s = &(*s)[strcspn(*s, " \t[]\n")];
-	if (strchr("[\n", **s))
-		return EXPR_INVALID;
-
-	char tmp = **s;
-	**s = '\0';
+	char tmp = *end;
+	*end = '\0';
 	enum expr_type t = 0;
-	while (t < EXPR_INVALID && strcmp(start, expr_type_str[t]))
+	while (t < EXPR_INVALID && strcmp(bgn, expr_type_str[t]))
 		++t;
-	**s = tmp;
+	*end = tmp;
 	return t;
 }
 
 bool
 has_arg(enum expr_type t)
 {
-	enum expr_type have_arg[8] = {
-		EXPR_VAR,
-		EXPR_INCL,
-		EXPR_IF,
-		EXPR_IFNOT,
-		EXPR_FOR,
-		EXPR_REVFOR,
-		EXPR_FORALL,
-		EXPR_REVFORALL
-	};
-	for (int i = 0; i < 8; ++i)
-		if (t == have_arg[i])
-			return true;
-	return false;
+	return t == EXPR_VAR
+	    || t == EXPR_INCL
+	    || t == EXPR_IF
+	    || t == EXPR_IFNOT
+	    || t == EXPR_FOR
+	    || t == EXPR_REVFOR
+	    || t == EXPR_FORALL
+	    || t == EXPR_REVFORALL;
 }
 
 /* greedy parse expression argument,
- * don't trim before and after,
  * return NULL on error */
 char *
 parse_arg(char **s)
 {
-	char *start = *s;
-	*s = &(*s)[strcspn(*s, " \t[]\n")];
-	if (strchr("[\n", **s))
+	char *bgn = *s + strspn(*s, WHITES);
+	char *end = bgn + strcspn(bgn, WHITES);
+	*s = end + strspn(end, WHITES);
+	if (**s || bgn == end)
 		return NULL;
 
-	char *arg = ecalloc(1, *s - start + 1);
-	memcpy(arg, start, *s - start);
+	char *arg = ecalloc(1, end - bgn + 1);
+	memcpy(arg, bgn, end - bgn);
 	return arg;
 }
 
-/* greedy parse expression in '[', ']',
- * expect '[' as first character,
+/* greedy parse expression between expr_open and expr_close,
  * return NULL on error */
 struct expr *
 parse_expr(char **s)
 {
-	if (*(*s)++ != '[')
+	int expr_open_len = strlen(expr_open);
+	if (strncmp(*s, expr_open, expr_open_len))
 		return NULL;
+	char *bgn = *s += expr_open_len;
 
-	while (isblank(**s))
-		++*s;
-	if (strchr("[]\n", **s))
+	char *end = bgn;
+	int expr_close_len = strlen(expr_close);
+	while (*end && strncmp(end, expr_close, expr_close_len))
+		++end;
+	if (!*end)
 		return NULL;
+	*s = end + expr_close_len;
 
-	enum expr_type t = parse_expr_type(s);
-	if (t == EXPR_INVALID)
-		return NULL;
-
-	char *arg = NULL;
-	if (has_arg(t)) {
-		while (isblank(**s))
-			++*s;
-		if (strchr("[]\n", **s))
-			return NULL;
-		arg = parse_arg(s);
-	}
-
-	while (isblank(**s))
-		++*s;
-	if (**s != ']') {
+	*end = '\0';
+	enum expr_type t = parse_expr_type(&bgn);
+	char *arg = has_arg(t) ? parse_arg(&bgn) : NULL;
+	*end = expr_close[0];
+	if (t == EXPR_INVALID || (has_arg(t) && !arg) || bgn != end) {
 		free(arg);
 		return NULL;
 	}

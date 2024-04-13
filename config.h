@@ -3,8 +3,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+static const char *const expr_open  = "[";
+static const char *const expr_close = "]";
+
 /* indexed by enum expr_type */
-const char* const expr_type_str[15] = {
+static const char *const expr_type_str[15] = {
 	"PATH",
 	"CONTENT",
 	"INCL",

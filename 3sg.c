@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "fatal.h"
 #include "tmpl.h"
 
@@ -196,11 +197,11 @@ gen(struct user_args *a, FILE *fout, struct scope *sc, char *path, bool _read_cf
 		}
 		if (*s == '\n')
 			++l;
-		if (esc || !strchr("[]", *s)) {
-			fputc(*s, fout);
-		} else if (*s == ']') {
-			fprintf(stderr, "Unmatched ']' (%s:%i)\n", path, l);
+		if (!esc && !strncmp(s, expr_close, strlen(expr_close))) {
+			fprintf(stderr, "Unmatched \"%s\" (%s:%i)\n", expr_close, path, l);
 			exit(EXIT_FAILURE);
+		} else if (esc || strncmp(s, expr_open, strlen(expr_open))) {
+			fputc(*s, fout);
 		} else if (!(x = parse_expr(&s))) {
 			printf("Invalid expression (%s:%i)\n", path, l);
 			exit(EXIT_FAILURE);

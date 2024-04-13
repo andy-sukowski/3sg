@@ -29,7 +29,7 @@ enum expr_type {
 	EXPR_VAR
 };
 
-/* expression inside '[' and ']' */
+/* expression inside expr_open and expr_close */
 struct expr {
 	enum expr_type type;
 	char *arg; /* NULL if unused */
@@ -42,11 +42,12 @@ char *get_val(struct var *vars, const char *key);
 
 void free_vars(struct var *v, struct var *until);
 
-/* greedy parse upto '\n' or '\0',
+/* greedy parse upto '\0',
  * return NULL on error */
 struct var *parse_var(char **s);
 
 /* parse all variables in string,
+ * may contain comments and empty lines,
  * prepend most recent variable,
  * return 0 on success,
  * return line number on error */
@@ -56,8 +57,7 @@ struct expr *new_expr(enum expr_type type, char *arg, struct expr *next);
 
 void free_exprs(struct expr *x);
 
-/* greedy parse expression in '[', ']',
- * expect '[' as first character,
+/* greedy parse expression between expr_open and expr_close,
  * return NULL on error */
 struct expr *parse_expr(char **s);
 
