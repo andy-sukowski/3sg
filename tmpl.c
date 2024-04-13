@@ -9,6 +9,8 @@
 #include "fatal.h"
 #include "tmpl.h"
 
+#define BLANKS " \t" /* isblank() */
+
 struct var *
 new_var(char *key, char *val, struct var *next)
 {
@@ -46,46 +48,34 @@ free_vars(struct var *v, struct var *until)
 char *
 parse_key(char **s)
 {
-	while (isblank(**s))
-		++*s;
-	if (strchr("=\n", **s))
-		return NULL;
-	char *start = *s;
-
-	*s = &(*s)[strcspn(*s, " \t\n=")];
-	if (strchr("\n", **s))
-		return NULL;
-	char *end = *s;
-
-	while (isblank(**s))
-		++*s;
-	if (**s != '=')
+	char *bgn = *s + strspn(*s, BLANKS);
+	char *end = bgn + strcspn(bgn, BLANKS "=");
+	*s = end + strspn(end, BLANKS);
+	if (**s != '=' || bgn == end)
 		return NULL;
 
-	char *key = ecalloc(1, end - start + 1);
-	memcpy(key, start, end - start);
+	char *key = ecalloc(1, end - bgn + 1);
+	memcpy(key, bgn, end - bgn);
 	return key;
 }
 
-/* greedy parse upto '\n' or '\0' */
+/* greedy parse upto '\0',
+ * trim before and after */
 char *
 parse_val(char **s)
 {
-	while (isblank(**s))
-		++*s;
-	char *start = *s;
-
-	*s = &(*s)[strcspn(*s, "\n")];
+	char *bgn = *s + strspn(*s, BLANKS);
+	*s += strlen(*s);
 	char *end = *s;
-	while (isblank(*(end - 1)))
+	while (strchr(BLANKS, end[-1]))
 		--end;
 
-	char *val = ecalloc(1, end - start + 1);
-	memcpy(val, start, end - start);
+	char *val = ecalloc(1, end - bgn + 1);
+	memcpy(val, bgn, end - bgn);
 	return val;
 }
 
-/* greedy parse upto '\n' or '\0',
+/* greedy parse upto '\0',
  * return NULL on error */
 struct var *
 parse_var(char **s)
@@ -103,6 +93,7 @@ parse_var(char **s)
 }
 
 /* parse all variables in string,
+ * may contain comments and empty lines,
  * prepend most recent variable,
  * return 0 on success,
  * return line number on error */
@@ -111,11 +102,21 @@ parse_vars(char *s, struct var **head)
 {
 	struct var *v;
 	for (int l = 1; *s; ++l) {
-		v = parse_var(&s);
-		if (!v)
-			return l;
+		char *bgn = s + strspn(s, BLANKS);
+		char *end = bgn + strcspn(bgn, "#\n");
+		s = end + strcspn(end, "\n");
 		if (*s)
 			++s; /* skip '\n' */
+		if (bgn == end)
+			continue;
+
+		char tmp = *end;
+		*end = '\0';
+		v = parse_var(&bgn);
+		if (!v)
+			return l;
+		*end = tmp;
+
 		v->next = *head;
 		*head = v;
 	}
